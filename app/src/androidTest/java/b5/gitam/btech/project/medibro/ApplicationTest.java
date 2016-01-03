@@ -1,4 +1,4 @@
-package abhijith.gitam.btech.project.medibro;
+package b5.gitam.btech.project.medibro;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;
