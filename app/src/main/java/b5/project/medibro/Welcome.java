@@ -4,7 +4,8 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
-import b5.project.medibro.R;
+
+import com.parse.ParseAnalytics;
 
 public class Welcome extends AppCompatActivity {
 
@@ -12,6 +13,7 @@ public class Welcome extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_welcome);
+        ParseAnalytics.trackAppOpenedInBackground(getIntent());
 
     }
 

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="selected_gray">#ffdbdbdb</color>
+    <color name="myPrimaryColor">#2196F3</color>
+    <color name="myPrimaryDarkColor">#1976D2</color>
+    <color name="myAccentColor">#3F51B5</color>
+    <color name="myDrawerBackground">#F2F2F2</color>
+    <color name="myWindowBackground">#DEDEDE</color>
+    <color name="myTextPrimaryColor">#000000</color>
+    <color name="myNavigationColor">#000000</color>
+    <color name="mid_gray">#605F64</color>
+    <color name="gray_text">#7F8285</color>
+    <color name="rim_color_gray">#B0B0B0</color>
+    <color name="center_text">#D31145</color>
+    <color name="round_progress_blue">#2173B9</color>
+</resources>
