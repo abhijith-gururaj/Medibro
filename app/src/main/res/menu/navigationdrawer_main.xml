@@ -4,19 +4,19 @@
         <item
             android:id="@+id/drawer_home"
             android:checked="true"
-            android:icon="@drawable/messenger_bubble_large_blue"
-            android:title="Item1" />
+            android:icon="@drawable/ic_home_24dp"
+            android:title="Home" />
 
         <item
-            android:id="@+id/drawer_feed"
+            android:id="@+id/drawer_pill"
             android:checked="false"
-            android:icon="@drawable/messenger_bubble_large_blue"
-            android:title="Item2" />
+            android:icon="@drawable/pill"
+            android:title="My Medications" />
 
         <item
-            android:id="@+id/drawer_events"
+            android:id="@+id/drawer_profile"
             android:checked="false"
-            android:icon="@drawable/messenger_bubble_large_blue"
-            android:title="Item3" />
+            android:icon="@drawable/ic_account_box_24dp"
+            android:title="Profile" />
     </group>
 </menu>

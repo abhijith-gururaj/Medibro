@@ -32,4 +32,5 @@ dependencies {
     compile 'com.parse:parsetwitterutils-android:1.10.3'
     compile 'de.hdodenhof:circleimageview:2.0.0'
     compile 'com.android.support:recyclerview-v7:23.1.1'
+    compile 'com.google.android.gms:play-services-appindexing:8.1.0'
 }

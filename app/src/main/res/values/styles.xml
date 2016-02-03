@@ -12,7 +12,6 @@
         <item name="colorAccent">@color/myAccentColor</item>
         <!--<item name="android:textColorPrimary">#00000b</item>
         <item name="android:textColorSecondary">@color/myTextPrimaryColor</item>-->
-        <item name="android:textColor">#fff</item>
         <item name="android:windowBackground">@color/myWindowBackground</item>
     </style>
 
@@ -41,5 +40,9 @@
         even if we define popupTheme for our <Toolbar> -->
         <!-- <item name="android:background">@color/color_primary</item> -->
     </style>
+
+    <style name="AppTheme..AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="AppTheme..PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
 </resources>
