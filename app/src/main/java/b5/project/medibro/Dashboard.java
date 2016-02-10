@@ -1,5 +1,6 @@
 package b5.project.medibro;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -21,7 +22,7 @@ import com.parse.ParseUser;
 
 import b5.project.medibro.fragments.Home;
 import b5.project.medibro.fragments.MedicationsFragment;
-import b5.project.medibro.fragments.ProfileFragment;
+import b5.project.medibro.fragments.MyProfileFragment;
 
 public class Dashboard extends AppCompatActivity {
 
@@ -98,7 +99,7 @@ public class Dashboard extends AppCompatActivity {
                         break;
 
                     case R.id.drawer_profile:
-                        mFragment = new ProfileFragment();
+                        mFragment = new MyProfileFragment();
                         mTag = "Profile";
                         fm.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
                         fm.beginTransaction().replace(R.id.container, mFragment, mTag).commit();
@@ -107,6 +108,7 @@ public class Dashboard extends AppCompatActivity {
                 }
                 return true;
             }
+
         });
 
         ActionBarDrawerToggle actionBarDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, toolbar, R.string.openDrawer, R.string.closeDrawer) {
@@ -145,7 +147,8 @@ public class Dashboard extends AppCompatActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_edit_profile) {
+            startActivity(new Intent(this, EditProfile.class));
             return true;
         }
 

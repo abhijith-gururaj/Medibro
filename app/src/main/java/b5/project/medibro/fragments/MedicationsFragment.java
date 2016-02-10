@@ -5,6 +5,9 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -24,6 +27,12 @@ public class MedicationsFragment extends Fragment implements AdapterView.OnItemC
 
     public MedicationsFragment() {
         // Required empty public constructor
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
     }
 
     @Override
@@ -58,5 +67,12 @@ public class MedicationsFragment extends Fragment implements AdapterView.OnItemC
         Intent intent = new Intent(getActivity(), MedicationDetails.class);
         intent.putExtras(args);
         startActivity(intent);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        MenuItem item = menu.findItem(R.id.action_edit_profile);
+        item.setVisible(false);
+        super.onCreateOptionsMenu(menu, inflater);
     }
 }

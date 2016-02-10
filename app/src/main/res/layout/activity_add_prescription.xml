@@ -11,6 +11,7 @@
 
     <ScrollView
         android:layout_width="match_parent"
+        android:windowSoftInputMode="adjustPan"
         android:layout_height="wrap_content">
 
         <LinearLayout
@@ -165,7 +166,6 @@
                             android:textColor="@color/myPrimaryColor"
                             android:textStyle="bold"
                             android:layout_width="fill_parent"
-                            android:text="26th Jan 2015"
                             android:layout_height="wrap_content" />
 
                     </LinearLayout>

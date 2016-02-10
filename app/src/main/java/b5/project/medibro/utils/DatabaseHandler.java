@@ -25,6 +25,11 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     public static final String START_DATE = "START_DATE";
     public static final String DURATION = "DURATION";
     public static final String ADDITIONAL_NOTES = "ADDITIONAL_NOTES";
+
+    public static final String TABLE_ALARMS = "medication_alarms";
+    public static final String MEDICATION_ID = "medication_id";
+    public static final String ALARMS_SET_ID = "set_id";
+    public static final String ALARMS_CANCEL_ID = "cancellation_id";
     public static final String TAG = "Database Handler";
 
     public DatabaseHandler(Context context) {
@@ -44,12 +49,20 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 + ADDITIONAL_NOTES + " TEXT" + ")";
         db.execSQL(CREATE_MEDICATION_TABLE);
         Log.d(TAG, TABLE_MEDICATION + " table created");
+
+        String CREATE_ALARMS_TABLE = "CREATE TABLE " + TABLE_ALARMS + " ("
+                + ALARMS_SET_ID + " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,"
+                + ALARMS_CANCEL_ID + " INTEGER UNIQUE, "
+                + MEDICATION_ID + " INTEGER NOT NULL " + ")";
+        db.execSQL(CREATE_ALARMS_TABLE);
+        Log.d(TAG, TABLE_ALARMS + " table created");
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         Log.d(TAG, "onUpgrade");
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_MEDICATION);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_ALARMS);
         // Create tables again
         onCreate(db);
     }
@@ -124,10 +137,49 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             counter++;
             cursor.moveToNext();
         }
-
+        cursor.close();
         db.close();
         return hashMap;
     }
 
+    public int getLatestAlarmId() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        int lastId = 0;
+        String query = "SELECT " + ALARMS_SET_ID + " from " + TABLE_ALARMS +
+                " order by " + ALARMS_SET_ID +
+                " DESC limit 1";
+        Cursor c = db.rawQuery(query, null);
+        if (c.moveToFirst()) {
+            lastId = c.getInt(0);
+            //The 0 is the column index, we only have 1 column, so the index is 0
+        }
+        c.close();
+        db.close();
+        return lastId + 1;
+    }
 
+    public void addAlarm(long medId, int setId, int cancelId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(MEDICATION_ID, medId);
+        contentValues.put(ALARMS_CANCEL_ID, cancelId);
+        contentValues.put(ALARMS_SET_ID, setId);
+        db.insert(TABLE_ALARMS, null, contentValues);
+        Log.d(TAG, "Inserting: " + medId + " " + setId + " " + cancelId);
+        db.close();
+    }
+
+    public void deleteMedication(int medId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        int row = db.delete(TABLE_MEDICATION, ID + "=" + medId, null);
+        Log.d(TAG, "deleted " + row + " row");
+        db.close();
+    }
+
+    public void deleteAlarms(int medId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        int rows = db.delete(TABLE_ALARMS, MEDICATION_ID + "=" + medId, null);
+        Log.d(TAG, "deleted " + rows + " rows");
+        db.close();
+    }
 }

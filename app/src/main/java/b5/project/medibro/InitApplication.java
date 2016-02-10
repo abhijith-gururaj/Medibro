@@ -6,9 +6,12 @@ import android.util.Log;
 import com.facebook.FacebookSdk;
 import com.parse.Parse;
 import com.parse.ParseACL;
+import com.parse.ParseObject;
 import com.parse.ParseTwitterUtils;
 import com.parse.ParseUser;
 
+import b5.project.medibro.pojos.FeedComment;
+import b5.project.medibro.pojos.FeedItem;
 import b5.project.medibro.utils.ParseFacebookUtils;
 
 /**
@@ -27,7 +30,8 @@ public class InitApplication extends Application {
 
         // Add your initialization code here
 
-
+        ParseObject.registerSubclass(FeedItem.class);
+        ParseObject.registerSubclass(FeedComment.class);
         Parse.initialize(this);
         ParseUser.enableAutomaticUser();
         ParseFacebookUtils.initialize(getApplicationContext());

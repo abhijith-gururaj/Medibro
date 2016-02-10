@@ -32,9 +32,7 @@ import java.util.SimpleTimeZone;
 
 import bolts.Task;
 
-/**
- * package
- */
+
 class FacebookController {
 
     /**

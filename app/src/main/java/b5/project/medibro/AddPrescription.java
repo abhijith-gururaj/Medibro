@@ -27,7 +27,6 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -69,7 +68,10 @@ public class AddPrescription extends AppCompatActivity implements NumberPicker.O
         mListView = (NonScrollListView) findViewById(R.id.reminders_listView);
         spinner = (Spinner) findViewById(R.id.reminders_spinner);
         mStartDate = (TextView) findViewById(R.id.start_date_tv);
-
+        Calendar cal = Calendar.getInstance();
+        Date currDate = cal.getTime();
+        String currentDate = currDate.getDate() + "/" + (currDate.getMonth() + 1) + "/" + (currDate.getYear() + 1900);
+        mStartDate.setText(currentDate);
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -225,55 +227,56 @@ public class AddPrescription extends AppCompatActivity implements NumberPicker.O
         id = handler.addMedication(medication_name, intervals, reminder_times,
                 startDate, duration, additional_notes);
 
-        setAlarms();
+        handler.close();
+        setAlarms(id);
     }
 
-    private void setAlarms() {
+    private void setAlarms(long id) {
         Intent myIntent = new Intent(getApplicationContext(), AlarmReceiver.class);
         myIntent.putExtra("MedName", medication_name);
         myIntent.setAction("b5.project.medibro.receivers.AlarmReceiver");
         AlarmManager am = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-
-        String pId = String.valueOf(id) + "000";
-        int uniqueId = Integer.valueOf(pId);
+        DatabaseHandler db = new DatabaseHandler(this);
+        int setId = db.getLatestAlarmId();
+        int cancelId = Integer.valueOf(String.valueOf(setId) + "0000");
         for (String timer : timers) {
             SimpleDateFormat dateFormat = new SimpleDateFormat("dd/mm/yyyy hh:mm");
-            try {
-                String[] comps = timer.split(":");
-                Calendar cal = Calendar.getInstance();
-                cal.set(Calendar.HOUR_OF_DAY, Integer.valueOf(comps[0]));
-                cal.set(Calendar.MINUTE, Integer.valueOf(comps[1]));
-                cal.set(Calendar.SECOND, 0);
-                cal.set(Calendar.MILLISECOND, 0);
-                //Date date= dateFormat.parse(startDate + " " + timer);
-                Log.d(TAG, comps[0] + " " + comps[1] + "Alarm Time: " + cal.getTime().toString());
-                PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), uniqueId, myIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-                am.setInexactRepeating(AlarmManager.RTC_WAKEUP,
-                        cal.getTimeInMillis(),
-                        AlarmManager.INTERVAL_DAY,
-                        pendingIntent);
+            String[] comps = timer.split(":");
+            Calendar cal = Calendar.getInstance();
+            cal.set(Calendar.HOUR_OF_DAY, Integer.valueOf(comps[0]));
+            cal.set(Calendar.MINUTE, Integer.valueOf(comps[1]));
+            cal.set(Calendar.SECOND, 0);
+            cal.set(Calendar.MILLISECOND, 0);
+            //Date date= dateFormat.parse(startDate + " " + timer);
+            Log.d(TAG, comps[0] + " " + comps[1] + "Alarm Time: " + cal.getTime().toString());
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), cancelId, myIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+            am.setInexactRepeating(AlarmManager.RTC_WAKEUP,
+                    setId,
+                    AlarmManager.INTERVAL_DAY,
+                    pendingIntent);
+            Log.d(TAG, "Alarm pid: " + setId);
+            setId++;
+            if (!duration.equals("CONTINUOUS")) {
+                int cancellationDate = medSelectedDay + Integer.valueOf(duration);
+                String cancelDate = cancellationDate + "/" + medSelectedMonth + "/" + medSelectedYear;
 
-                Log.d(TAG, "Counter: " + uniqueId);
-                if (!duration.equals("CONTINUOUS")) {
-                    int cancellationDate = medSelectedDay + Integer.valueOf(duration);
-                    String cancelDate = cancellationDate + "/" + medSelectedMonth + "/" + medSelectedYear;
-
-                    Date cancellingDate = dateFormat.parse(cancelDate + " " + "23:59");
-                    Intent cancellationIntent = new Intent(this, CancelAlarmBroadcastReceiver.class);
-                    cancellationIntent.putExtra("key", pendingIntent);
-                    PendingIntent cancellationPendingIntent = PendingIntent.getBroadcast(getApplicationContext(), uniqueId, cancellationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-                    am.set(AlarmManager.RTC_WAKEUP,
-                            cancellingDate.getTime(),
-                            cancellationPendingIntent);
-
-                    Log.d(TAG, "Cancelling alarm at: " + cancelDate);
-                }
-                uniqueId++;
-
-            } catch (ParseException e) {
-                e.printStackTrace();
-                Log.d(TAG, "Time Parsing error: " + e.getMessage());
+                Calendar cancelCal = Calendar.getInstance();
+                cancelCal.set(Calendar.DAY_OF_MONTH, medSelectedDay);
+                cancelCal.set(Calendar.MONTH, medSelectedMonth);
+                cancelCal.set(Calendar.YEAR, medSelectedYear);
+                cancelCal.set(Calendar.HOUR_OF_DAY, 23);
+                cancelCal.set(Calendar.MINUTE, 59);
+                cancelCal.set(Calendar.SECOND, 59);
+                Intent cancellationIntent = new Intent(this, CancelAlarmBroadcastReceiver.class);
+                cancellationIntent.putExtra("key", pendingIntent);
+                PendingIntent cancellationPendingIntent = PendingIntent.getBroadcast(getApplicationContext(), cancelId, cancellationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                am.set(AlarmManager.RTC_WAKEUP,
+                        cancelCal.getTimeInMillis(),
+                        cancellationPendingIntent);
+                Log.d(TAG, "Cancelling alarm at: " + cancelDate + " pid: " + cancelId);
             }
+            cancelId++;
+            db.addAlarm(id, setId, cancelId);
         }
     }
 }

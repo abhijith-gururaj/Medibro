@@ -76,7 +76,7 @@
         </receiver>
         <receiver
             android:name=".receivers.CancelAlarmBroadcastReceiver"
-            android:enabled="true"></receiver>
+            android:enabled="true" />
 
         <!-- Will not be called unless the application explicitly enables it -->
         <receiver
@@ -95,6 +95,42 @@
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="b5.project.medibro.Dashboard" />
+        </activity>
+        <activity
+            android:name=".EditProfile"
+            android:label="@string/title_activity_edit_profile"
+            android:parentActivityName=".Dashboard"
+            android:theme="@style/AppTheme.">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="b5.project.medibro.Dashboard" />
+        </activity>
+        <activity
+            android:name=".AddQuestion"
+            android:label="@string/title_activity_add_question"
+            android:parentActivityName=".Dashboard"
+            android:theme="@style/AppTheme.">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="b5.project.medibro.Dashboard" />
+        </activity>
+        <activity
+            android:name=".FeedItemDetails"
+            android:label="@string/title_activity_feed_item_details"
+            android:parentActivityName=".Dashboard"
+            android:theme="@style/AppTheme.">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="b5.project.medibro.Dashboard" />
+        </activity>
+        <activity
+            android:name=".AddComment"
+            android:label="@string/title_activity_add_comment"
+            android:parentActivityName=".FeedItemDetails"
+            android:theme="@style/AppTheme.">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="b5.project.medibro.FeedItemDetails" />
         </activity>
     </application>
 

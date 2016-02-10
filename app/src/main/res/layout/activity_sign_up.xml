@@ -5,11 +5,13 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:fitsSystemWindows="true"
+    android:windowSoftInputMode="adjustPan"
     tools:context="b5.project.medibro.SignUp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:paddingBottom="16dp"
         android:orientation="vertical">
 
         <android.support.design.widget.AppBarLayout
@@ -97,8 +99,9 @@
             android:id="@+id/submit"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
             android:textColor="#000"
-            android:layout_gravity="end|right"
+            android:layout_gravity="end"
             android:text="Submit" />
     </LinearLayout>
 </android.support.design.widget.CoordinatorLayout>

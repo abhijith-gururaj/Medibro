@@ -8,6 +8,7 @@ import android.view.MenuItem;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import b5.project.medibro.utils.DatabaseHandler;
 import b5.project.medibro.utils.NonScrollListView;
 
 public class MedicationDetails extends AppCompatActivity {
@@ -63,9 +64,23 @@ public class MedicationDetails extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.delete_med) {
+            deleteMedication(medId);
             return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void deleteMedication(int medId) {
+        DatabaseHandler db = new DatabaseHandler(this);
+        cancelAlarms(medId);
+        db.deleteMedication(medId);
+        db.deleteAlarms(medId);
+        db.close();
+        finish();
+    }
+
+    private void cancelAlarms(int medId) {
+        //TODO: Fetch a list of alarms from database and cancel using alrmMangaer.cancel
     }
 }

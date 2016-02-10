@@ -1,8 +1,7 @@
 package b5.project.medibro;
 
+import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -13,7 +12,6 @@ import android.widget.Toast;
 
 import com.parse.ParseException;
 import com.parse.ParseUser;
-import com.parse.SaveCallback;
 import com.parse.SignUpCallback;
 
 public class SignUp extends AppCompatActivity {
@@ -66,6 +64,7 @@ public class SignUp extends AppCompatActivity {
                     public void done(ParseException e) {
                         if (e == null) {
                             Toast.makeText(SignUp.this, "Successfully Registered", Toast.LENGTH_LONG).show();
+                            startActivity(new Intent(SignUp.this, Dashboard.class));
                         } else {
                             Toast.makeText(SignUp.this, "Something's wrong : " + e.getMessage(), Toast.LENGTH_LONG).show();
                             Log.d(TAG, e.getMessage());

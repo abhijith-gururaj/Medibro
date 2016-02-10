@@ -27,7 +27,6 @@ import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
 import com.facebook.HttpMethod;
 import com.parse.LogInCallback;
-import com.parse.ParseAnalytics;
 import com.parse.ParseException;
 import com.parse.ParseFile;
 import com.parse.ParseTwitterUtils;
@@ -109,7 +108,7 @@ public class Welcome extends AppCompatActivity {
                         if (user != null) {
                             pDialog.dismiss();
                             Toast.makeText(Welcome.this, "Successfully Logged In", Toast.LENGTH_LONG).show();
-
+                            startActivity(new Intent(Welcome.this, Dashboard.class));
                         } else {
                             Toast.makeText(Welcome.this, "cannot login", Toast.LENGTH_LONG).show();
                             Log.d(TAG, e.getMessage());
