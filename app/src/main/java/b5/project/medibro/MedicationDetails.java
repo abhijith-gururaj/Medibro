@@ -1,13 +1,21 @@
 package b5.project.medibro;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+
+import b5.project.medibro.receivers.AlarmReceiver;
 import b5.project.medibro.utils.DatabaseHandler;
 import b5.project.medibro.utils.NonScrollListView;
 
@@ -72,15 +80,32 @@ public class MedicationDetails extends AppCompatActivity {
     }
 
     private void deleteMedication(int medId) {
+        Log.d("MedDetails", "Deleting medication");
         DatabaseHandler db = new DatabaseHandler(this);
-        cancelAlarms(medId);
+        cancelAlarms(medId, db);
         db.deleteMedication(medId);
         db.deleteAlarms(medId);
         db.close();
         finish();
     }
 
-    private void cancelAlarms(int medId) {
+    private void cancelAlarms(int medId, DatabaseHandler db) {
         //TODO: Fetch a list of alarms from database and cancel using alrmMangaer.cancel
+        Log.d("MedDetails", "Deleting Alarms");
+        ArrayList<Integer> setIds = db.getMedicationSetIds(medId);
+        if (!setIds.isEmpty()) {
+            AlarmManager am = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+            for (int index = 0; index < setIds.size(); index++) {
+                int setId = setIds.get(index);
+                Intent myIntent = new Intent(getApplicationContext(), AlarmReceiver.class);
+                myIntent.setAction("b5.project.medibro.receivers.AlarmReceiver");
+                PendingIntent pi = PendingIntent.getBroadcast(getApplicationContext(),
+                        setId,
+                        myIntent,
+                        PendingIntent.FLAG_UPDATE_CURRENT);
+                Log.d("MedDetails", "Deleting alarm id: " + setId);
+                am.cancel(pi);
+            }
+        }
     }
 }

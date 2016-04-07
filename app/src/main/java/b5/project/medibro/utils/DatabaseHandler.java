@@ -7,9 +7,10 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
-import b5.project.medibro.Medication;
+import b5.project.medibro.receivers.Medication;
 
 /**
  * Created by Abhijith on 1/27/2016.
@@ -31,6 +32,10 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     public static final String ALARMS_SET_ID = "set_id";
     public static final String ALARMS_CANCEL_ID = "cancellation_id";
     public static final String TAG = "Database Handler";
+
+    public static final String TABLE_CHAT_USERS = "chat_users";
+    public static final String FROM_USER_ID = "from_user_id";
+    public static final String TO_USER_ID = "to_user_id";
 
     public DatabaseHandler(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
@@ -56,6 +61,12 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 + MEDICATION_ID + " INTEGER NOT NULL " + ")";
         db.execSQL(CREATE_ALARMS_TABLE);
         Log.d(TAG, TABLE_ALARMS + " table created");
+
+        String CREATE_CHAT_USERS_TABLE = "CREATE TABLE " + TABLE_CHAT_USERS + " ("
+                + FROM_USER_ID + " TEXT NOT NULL,"
+                + TO_USER_ID + " TEXT UNIQUE NOT NULL " + ")";
+        db.execSQL(CREATE_CHAT_USERS_TABLE);
+        Log.d(TAG, TABLE_CHAT_USERS + " table created");
     }
 
     @Override
@@ -63,6 +74,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         Log.d(TAG, "onUpgrade");
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_MEDICATION);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_ALARMS);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_CHAT_USERS);
         // Create tables again
         onCreate(db);
     }
@@ -106,6 +118,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             counter++;
             cursor.moveToNext();
         }
+        cursor.close();
+        db.close();
         return hashMap;
     }
 
@@ -181,5 +195,85 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         int rows = db.delete(TABLE_ALARMS, MEDICATION_ID + "=" + medId, null);
         Log.d(TAG, "deleted " + rows + " rows");
         db.close();
+    }
+
+    public ArrayList<Integer> getMedicationSetIds(int medId) {
+        ArrayList<Integer> setIds = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT " + ALARMS_SET_ID + " FROM " + TABLE_ALARMS + " WHERE " +
+                MEDICATION_ID + "=" + medId;
+        Log.d(TAG, query);
+        Cursor cursor = db.rawQuery(query, null);
+        cursor.moveToFirst();
+        while (!cursor.isAfterLast()) {
+            int setId = cursor.getInt(cursor.getColumnIndex(ALARMS_SET_ID));
+            setIds.add(setId);
+            Log.d(TAG, "MedId: " + medId + " setId: " + setId);
+            cursor.moveToNext();
+        }
+        cursor.close();
+        db.close();
+
+        return setIds.isEmpty() ? null : setIds;
+    }
+
+    public void addChatUsers(String id1, String id2) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues cv = new ContentValues();
+        cv.put(FROM_USER_ID, id1);
+        cv.put(TO_USER_ID, id2);
+
+        db.insert(TABLE_CHAT_USERS, null, cv);
+        Log.d(TAG, "Inserting: " + id1 + " , " + id2);
+        db.close();
+    }
+
+    public HashMap<Integer, String> getBuddyList(String fromId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        HashMap<Integer, String> hashMap = new HashMap<>();
+
+        String[] columns = {TO_USER_ID};//colums name that you select
+
+        Cursor res = db.query(TABLE_CHAT_USERS, columns, FROM_USER_ID + "=?",
+                new String[]{fromId}, null, null, null);
+        res.moveToFirst();
+        int counter = 0;
+        while (!res.isAfterLast()) {
+
+            String toUserId = res.getString(res.getColumnIndex(TO_USER_ID));
+            hashMap.put(counter, toUserId);
+            Log.d(TAG, toUserId);
+            res.moveToNext();
+            counter++;
+        }
+
+        res.close();
+        db.close();
+        return hashMap;
+    }
+
+    public Boolean hasBuddyRow(String toId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+        String[] columns = {FROM_USER_ID};//colums name that you select
+
+        try {
+            cursor = db.query(TABLE_CHAT_USERS, columns, TO_USER_ID + "=?",
+                    new String[]{toId}, null, null, null);
+        } catch (Exception e) {
+            return false;
+        }
+
+//        if(cursor.moveToFirst())
+//            return false;
+//
+//        Boolean b=cursor.getString(cursor.getColumnIndex(FROM_USER_ID))==null;
+
+        Boolean b = cursor.moveToFirst();
+        cursor.close();
+        db.close();
+        return b;
     }
 }

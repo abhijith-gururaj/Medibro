@@ -4,13 +4,14 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.google.gson.Gson;
 import com.parse.ParseException;
+import com.parse.ParseObject;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
 
@@ -24,6 +25,7 @@ public class AddComment extends AppCompatActivity {
     @Bind(R.id.add_comment)
     EditText mAddComment;
     FeedItem feedItem;
+    public static final String TAG = AddComment.class.getSimpleName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,8 +36,9 @@ public class AddComment extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         ButterKnife.bind(this);
-        String jsonItem = getIntent().getStringExtra("feedItem");
-        feedItem = new Gson().fromJson(jsonItem, FeedItem.class);
+        String feedItemId = getIntent().getStringExtra("feedItemId");
+        Log.d(TAG, "feedItemId: " + feedItemId);
+        feedItem = ParseObject.createWithoutData(FeedItem.class, feedItemId);
     }
 
     @Override
@@ -52,6 +55,17 @@ public class AddComment extends AppCompatActivity {
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_done) {
             if (!mAddComment.getText().toString().isEmpty()) {
+                //feedItem.increment("feedComments");
+//                feedItem.put("feedComments",feedItem.getCommentCount()+1);
+//                feedItem.saveInBackground(new SaveCallback() {
+//                    @Override
+//                    public void done(ParseException e) {
+//                        if(e!=null){
+//                            Log.d("Feed Details","Error: "+e.getMessage());
+//                            e.printStackTrace();
+//                        }
+//                    }
+//                });
                 final FeedComment comment = new FeedComment();
                 comment.setParent(feedItem.getObjectId());
                 comment.setComment(mAddComment.getText().toString());
@@ -60,14 +74,19 @@ public class AddComment extends AppCompatActivity {
                     @Override
                     public void done(ParseException e) {
                         if (e == null) {
+                            Log.d("Add Comment", "save comments: " + feedItem.getCommentCount());
                             Intent intent = new Intent();
-                            intent.putExtra("feedComment", new Gson().toJson(comment));
+                            intent.putExtra("commentObjectId", comment.getObjectId());
+                            intent.putExtra("comment", comment.getComment());
+                            intent.putExtra("commentedBy", comment.getCommentedBy());
+                            intent.putExtra("parent", comment.getParent());
                             setResult(RESULT_OK, intent);
                             finish();
                         } else {
-                            Toast.makeText(AddComment.this, "Something's Wrong.Please try again later",
+                            Toast.makeText(AddComment.this, "Something is Wrong." + e.getMessage(),
                                     Toast.LENGTH_LONG)
                                     .show();
+                            e.printStackTrace();
                         }
                     }
                 });

@@ -11,8 +11,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.gson.Gson;
-
 import java.util.ArrayList;
 
 import b5.project.medibro.FeedItemDetails;
@@ -53,7 +51,10 @@ public class MyFeedAdapter extends RecyclerView.Adapter<MyFeedAdapter.ViewHolder
                 Toast.makeText(context, "Clicked :" + item.getFeedQuestion(),
                         Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(context, FeedItemDetails.class);
-                intent.putExtra("feedItem", new Gson().toJson(item));
+                intent.putExtra("feedItemId", item.getObjectId());
+                intent.putExtra("feedTopic", item.getFeedTopic());
+                intent.putExtra("feedDesc", item.getFeedDescription());
+                intent.putExtra("feedQuestion", item.getFeedQuestion());
                 context.startActivity(intent);
             }
         });
@@ -73,6 +74,14 @@ public class MyFeedAdapter extends RecyclerView.Adapter<MyFeedAdapter.ViewHolder
         });
     }
 
+    public void clearData() {
+        int size = this.feedItems.size();
+
+        feedItems.clear();
+
+        this.notifyItemRangeRemoved(0, size);
+    }
+
     @Override
     public int getItemCount() {
         return feedItems.size();
@@ -81,7 +90,6 @@ public class MyFeedAdapter extends RecyclerView.Adapter<MyFeedAdapter.ViewHolder
     public void addFeedItem(FeedItem newItem) {
         feedItems.add(newItem);
     }
-
 
     class ViewHolder extends RecyclerView.ViewHolder {
 
@@ -111,6 +119,5 @@ public class MyFeedAdapter extends RecyclerView.Adapter<MyFeedAdapter.ViewHolder
             followCount.setText(String.valueOf(item.getFollowCount()));
             commentCount.setText(String.valueOf(item.getCommentCount()));
         }
-
     }
 }

@@ -1,4 +1,4 @@
-package b5.project.medibro;
+package b5.project.medibro.receivers;
 
 /**
  * Created by Abhijith on 1/30/2016.

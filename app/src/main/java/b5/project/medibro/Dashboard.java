@@ -101,6 +101,9 @@ public class Dashboard extends AppCompatActivity {
                     case R.id.drawer_profile:
                         mFragment = new MyProfileFragment();
                         mTag = "Profile";
+                        args.putBoolean("parentDashboard", true);
+                        args.putString("userId", ParseUser.getCurrentUser().getObjectId());
+                        mFragment.setArguments(args);
                         fm.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
                         fm.beginTransaction().replace(R.id.container, mFragment, mTag).commit();
                         break;

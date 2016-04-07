@@ -5,13 +5,20 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+import android.widget.TextView;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 
 import b5.project.medibro.AddPrescription;
 import b5.project.medibro.R;
+import b5.project.medibro.receivers.Medication;
+import b5.project.medibro.utils.DatabaseHandler;
 import b5.project.medibro.utils.MyMedAdapter;
 
 /**
@@ -22,9 +29,12 @@ import b5.project.medibro.utils.MyMedAdapter;
  */
 public class PrescriptionsFragment extends Fragment {
 
+    private static final String TAG = PrescriptionsFragment.class.getSimpleName();
     FloatingActionButton fab;
     ListView prescriptionsList;
     private OnFragmentInteractionListener mListener;
+    private ArrayList<Medication> medications;
+    TextView tv;
 
     public PrescriptionsFragment() {
         // Required empty public constructor
@@ -35,7 +45,7 @@ public class PrescriptionsFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_prescriptions, container, false);
-
+        Log.d(TAG, "On Create Called");
         fab = (FloatingActionButton) v.findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -43,10 +53,25 @@ public class PrescriptionsFragment extends Fragment {
                 startActivity(new Intent(getActivity(), AddPrescription.class));
             }
         });
-
+        tv = (TextView) v.findViewById(R.id.noItems);
         prescriptionsList = (ListView) v.findViewById(R.id.prescriptions_list);
-        prescriptionsList.setAdapter(new MyMedAdapter(getActivity(), "all"));
+
         return v;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.d(TAG, "On Resume");
+        DatabaseHandler db = new DatabaseHandler(getActivity());
+        HashMap<Integer, Medication> hashMap = db.getMedicationDetails();
+        medications = new ArrayList<>();
+        Log.d(TAG, "hashmap size: " + hashMap.size());
+        for (int i = 0; i < hashMap.size(); i++) {
+            medications.add(i, hashMap.get(i));
+        }
+        prescriptionsList.setAdapter(new MyMedAdapter(getActivity(), "all", medications));
+        prescriptionsList.setEmptyView(tv);
     }
 
     // TODO: Rename method, update argument and hook method into UI event

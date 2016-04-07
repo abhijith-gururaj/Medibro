@@ -1,0 +1,51 @@
+{
+  "project_info": {
+    "project_id": "medibro-ce2e1",
+    "project_number": "304410377179",
+    "name": "Medibro"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:304410377179:android:dca172157bd932cc",
+        "client_id": "android:b5.project.medibro",
+        "client_type": 1,
+        "android_client_info": {
+          "package_name": "b5.project.medibro"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "304410377179-f3llgrar7nn5ig8vgotik1gt1oqefio9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "b5.project.medibro",
+            "certificate_hash": "703658F73373700AF56A8482E803334898ACC29D"
+          }
+        }
+      ],
+      "api_key": [],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "cloud_messaging_service": {
+          "status": 1,
+          "apns_config": []
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "google_signin_service": {
+          "status": 2
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "client_info": [],
+  "ARTIFACT_VERSION": "1"
+}

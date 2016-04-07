@@ -7,7 +7,7 @@
     <android.support.v7.widget.RecyclerView
         android:layout_width="match_parent"
         android:id="@+id/feed_list"
-        android:layout_height="wrap_content" />
+        android:layout_height="match_parent" />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab_addQuestion"
@@ -16,5 +16,24 @@
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
         android:src="@android:drawable/ic_popup_reminder" />
+
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        style="?android:attr/progressBarStyleSmall"
+        android:visibility="invisible"
+        android:layout_gravity="center"
+        android:progressDrawable="@drawable/circular_progress_bar" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/noItems"
+        android:visibility="gone"
+        android:textSize="18sp"
+        android:textColor="@color/myPrimaryColor"
+        android:layout_gravity="center"
+        android:text="@string/no_feed_items" />
 
 </FrameLayout>

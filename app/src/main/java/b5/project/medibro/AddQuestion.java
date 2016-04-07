@@ -43,9 +43,11 @@ public class AddQuestion extends AppCompatActivity {
             public void onClick(View view) {
                 final FeedItem item = new FeedItem();
                 item.setFeedTopic(mQTopic.getText().toString());
+                item.setCommentCount(0);
                 item.setFeedQuestion(mQuestion.getText().toString());
-                item.setFeedQuestion(mQDesc.getText().toString());
+                item.setFeedDescription(mQDesc.getText().toString());
                 item.setCreatedBy(ParseUser.getCurrentUser().getObjectId());
+                item.initFollowedBy();
                 item.saveInBackground(new SaveCallback() {
                     @Override
                     public void done(ParseException e) {

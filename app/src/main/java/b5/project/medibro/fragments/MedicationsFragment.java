@@ -4,6 +4,7 @@ package b5.project.medibro.fragments;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -12,18 +13,27 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 import b5.project.medibro.Dashboard;
-import b5.project.medibro.Medication;
 import b5.project.medibro.MedicationDetails;
 import b5.project.medibro.R;
+import b5.project.medibro.receivers.Medication;
+import b5.project.medibro.utils.DatabaseHandler;
 import b5.project.medibro.utils.MyMedAdapter;
 
 
 public class MedicationsFragment extends Fragment implements AdapterView.OnItemClickListener {
 
+    private static final String TAG = MedicationsFragment.class.getSimpleName();
     ListView listView;
+    MyMedAdapter adapter;
+    private ArrayList<Medication> medications;
+    TextView tv;
 
     public MedicationsFragment() {
         // Required empty public constructor
@@ -42,10 +52,14 @@ public class MedicationsFragment extends Fragment implements AdapterView.OnItemC
         View rootView = inflater.inflate(R.layout.fragment_medications, container, false);
         ((Dashboard) getActivity()).getSupportActionBar().setTitle("Medications");
         listView = (ListView) rootView.findViewById(R.id.medications_list);
-        listView.setAdapter(new MyMedAdapter(getActivity(), "names"));
+        tv = (TextView) rootView.findViewById(R.id.noItems);
+
         listView.setOnItemClickListener(this);
+        listView.setEmptyView(tv);
+
         return rootView;
     }
+
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -74,5 +88,20 @@ public class MedicationsFragment extends Fragment implements AdapterView.OnItemC
         MenuItem item = menu.findItem(R.id.action_edit_profile);
         item.setVisible(false);
         super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        medications = new ArrayList<>();
+        DatabaseHandler db = new DatabaseHandler(getActivity());
+        HashMap<Integer, Medication> hashMap = db.getMedicationDetails();
+        Log.d(TAG, "medications size: " + hashMap.size());
+        tv.setVisibility(View.GONE);
+        for (int i = 0; i < hashMap.size(); i++) {
+            medications.add(i, hashMap.get(i));
+        }
+        adapter = new MyMedAdapter(getActivity(), "names", medications);
+        listView.setAdapter(adapter);
     }
 }

@@ -12,10 +12,13 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.parse.FindCallback;
 import com.parse.ParseException;
+import com.parse.ParsePush;
 import com.parse.ParseQuery;
 
 import java.util.ArrayList;
@@ -34,10 +37,14 @@ import b5.project.medibro.utils.MyFeedAdapter;
  */
 public class FeedFragment extends Fragment {
 
+    private static final String TAG = FeedFragment.class.getSimpleName();
     private OnFragmentInteractionListener mListener;
     RecyclerView recyclerView;
     private MyFeedAdapter adapter;
-
+    ProgressBar progressBar;
+    View v;
+    ParseQuery<FeedItem> query;
+    TextView tv;
     public FeedFragment() {
         // Required empty public constructor
     }
@@ -46,21 +53,9 @@ public class FeedFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        final View v = inflater.inflate(R.layout.fragment_feed, container, false);
-
-
-        ParseQuery<FeedItem> query = ParseQuery.getQuery(FeedItem.class);
-        query.findInBackground(new FindCallback<FeedItem>() {
-            @Override
-            public void done(List<FeedItem> objects, ParseException e) {
-                ArrayList<FeedItem> list = new ArrayList<FeedItem>(objects);
-                recyclerView = (RecyclerView) v.findViewById(R.id.feed_list);
-                recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-                adapter = new MyFeedAdapter(getActivity(), list);
-                recyclerView.setAdapter(adapter);
-            }
-        });
-
+        v = inflater.inflate(R.layout.fragment_feed, container, false);
+        tv = (TextView) v.findViewById(R.id.noItems);
+        progressBar = (ProgressBar) v.findViewById(R.id.progress_bar);
         FloatingActionButton fab = (FloatingActionButton) v.findViewById(R.id.fab_addQuestion);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -70,6 +65,47 @@ public class FeedFragment extends Fragment {
         });
 
         return v;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.d(TAG, "onResume");
+        progressBar.setVisibility(View.VISIBLE);
+        query = ParseQuery.getQuery(FeedItem.class);
+        query.findInBackground(new FindCallback<FeedItem>() {
+            @Override
+            public void done(List<FeedItem> objects, ParseException e) {
+                if (e == null) {
+                    if (getActivity() == null)
+                        query.cancel();
+                    else {
+                        if (objects.isEmpty()) {
+                            progressBar.setVisibility(View.GONE);
+                            recyclerView.setVisibility(View.GONE);
+                            tv.setVisibility(View.VISIBLE);
+                        } else {
+                            progressBar.setVisibility(View.GONE);
+                            ArrayList<FeedItem> list = new ArrayList<>(objects);
+                            recyclerView = (RecyclerView) v.findViewById(R.id.feed_list);
+                            recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+                            adapter = new MyFeedAdapter(getActivity(), list);
+                            recyclerView.setAdapter(adapter);
+                        }
+                    }
+                } else {
+                    Log.d(TAG, e.getMessage());
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        Log.d(TAG, "onPause");
+        query.cancel();
     }
 
     @Override
@@ -87,6 +123,7 @@ public class FeedFragment extends Fragment {
                     FeedItem newItem = new Gson().fromJson(jsonObject, FeedItem.class);
                     adapter.addFeedItem(newItem);
                     adapter.notifyDataSetChanged();
+                    ParsePush.subscribeInBackground("feed_" + newItem.getObjectId());
                 }
             }
             if (resultCode == Activity.RESULT_CANCELED) {
@@ -106,7 +143,6 @@ public class FeedFragment extends Fragment {
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
     }
 

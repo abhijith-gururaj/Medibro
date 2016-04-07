@@ -1,6 +1,7 @@
 package b5.project.medibro.utils;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.support.v7.widget.RecyclerView;
@@ -8,6 +9,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.parse.FindCallback;
@@ -17,11 +19,12 @@ import com.parse.ParseQuery;
 import com.parse.ParseUser;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import b5.project.medibro.R;
+import b5.project.medibro.ViewProfile;
 import b5.project.medibro.pojos.FeedComment;
-import b5.project.medibro.pojos.FeedItem;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -34,15 +37,18 @@ public class MyFeedDetailsAdapter extends RecyclerView.Adapter<MyFeedDetailsAdap
     private static final String TAG = "FeedDetailsAdapter";
     private final LayoutInflater mInflater;
     Context context;
-    FeedItem feedItem;
+    HashMap<String, String> feedItemDetails;
     ArrayList<FeedComment> feedComments;
+    ProgressBar bar;
 
-    public MyFeedDetailsAdapter(Context context, FeedItem feedItem, ArrayList<FeedComment> comments) {
+    public MyFeedDetailsAdapter(Context context, HashMap<String, String> feedItemDetails, ArrayList<FeedComment> comments, ProgressBar bar) {
         this.context = context;
-        this.feedItem = feedItem;
+        this.feedItemDetails = feedItemDetails;
         mInflater = LayoutInflater.from(context);
         feedComments = comments;
+        this.bar = bar;
         Log.d(TAG, "Size of comments list: " + feedComments.size());
+        Log.d(TAG, "Comments: " + feedComments.toString());
     }
 
     @Override
@@ -53,9 +59,23 @@ public class MyFeedDetailsAdapter extends RecyclerView.Adapter<MyFeedDetailsAdap
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        Log.d(TAG, "called bindViewHolder");
         final FeedComment comment = feedComments.get(position);
         holder.bindComments(comment);
+        final Intent intent = new Intent(context, ViewProfile.class);
+        intent.putExtra("userId", holder.commentUser);
+        holder.username.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                context.startActivity(intent);
+            }
+        });
+
+        holder.mProfileImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                context.startActivity(intent);
+            }
+        });
     }
 
     @Override
@@ -88,19 +108,15 @@ public class MyFeedDetailsAdapter extends RecyclerView.Adapter<MyFeedDetailsAdap
 
         public void bindComments(FeedComment comment) {
             commentUser = comment.getCommentedBy();
-            Log.d(TAG, "comented by: " + commentUser);
+            Log.d(TAG, "commented by: " + commentUser);
             ParseQuery<ParseUser> query = ParseUser.getQuery();
             query.whereEqualTo("objectId", commentUser);
             query.findInBackground(new FindCallback<ParseUser>() {
-
                 @Override
                 public void done(List<ParseUser> object, ParseException e) {
-                    // TODO Auto-generated method stub
                     if (e == null) {
-                        Log.d(TAG, "List not null");
                         for (ParseUser obj : object) {
                             username.setText(obj.getUsername());
-                            Log.d(TAG, obj.getUsername());
                             try {
                                 ParseFile parseFile = obj.getParseFile("profileThumb");
                                 byte[] data = parseFile.getData();

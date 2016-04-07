@@ -11,8 +11,8 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import b5.project.medibro.Medication;
 import b5.project.medibro.R;
+import b5.project.medibro.receivers.Medication;
 
 /**
  * Created by Abhijith on 1/30/2016.
@@ -24,21 +24,25 @@ public class MyMedAdapter extends BaseAdapter {
     String type;
     TextView medName, medIntervals, timersTv;
 
-    public MyMedAdapter(Context context, String type) {
-        medications = new ArrayList<>();
-        this.context = context;
-        this.type = type;
+    @Override
+    public void notifyDataSetChanged() {
+        super.notifyDataSetChanged();
         populateMedications();
     }
 
+    public MyMedAdapter(Context context, String type, ArrayList<Medication> medications) {
+        this.context = context;
+        this.type = type;
+        this.medications = medications;
+    }
+
     private void populateMedications() {
+        medications = new ArrayList<>();
         DatabaseHandler db = new DatabaseHandler(context);
         HashMap<Integer, Medication> hashMap = db.getMedicationDetails();
         for (int i = 0; i < hashMap.size(); i++) {
             medications.add(i, hashMap.get(i));
         }
-
-        Log.d(TAG, "Populated Array List");
     }
 
     @Override

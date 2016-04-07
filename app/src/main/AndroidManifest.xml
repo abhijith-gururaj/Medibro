@@ -4,7 +4,19 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+
+    <permission
+        android:name="b5.project.medibro.permission.C2D_MESSAGE"
+        android:protectionLevel="signature" />
+
+    <uses-permission android:name="b5.project.medibro.permission.C2D_MESSAGE" />
+
 
     <application
         android:name=".InitApplication"
@@ -21,6 +33,9 @@
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"
             android:value="@string/facebook_app_id" />
+        <meta-data
+            android:name="com.parse.push.gcm_sender_id"
+            android:value="id:685778736806" />;
 
         <activity
             android:name=".Welcome"
@@ -118,6 +133,7 @@
             android:name=".FeedItemDetails"
             android:label="@string/title_activity_feed_item_details"
             android:parentActivityName=".Dashboard"
+            android:launchMode="singleTask"
             android:theme="@style/AppTheme.">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -127,11 +143,72 @@
             android:name=".AddComment"
             android:label="@string/title_activity_add_comment"
             android:parentActivityName=".FeedItemDetails"
+            android:launchMode="singleTop"
             android:theme="@style/AppTheme.">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="b5.project.medibro.FeedItemDetails" />
         </activity>
+        <activity
+            android:name=".SearchActivity"
+            android:label="@string/title_activity_search"
+            android:parentActivityName=".Dashboard"
+            android:theme="@style/AppTheme.">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="b5.project.medibro.Dashboard" />
+        </activity>
+        <activity
+            android:name=".Chat"
+            android:label="@string/title_activity_chat"
+            android:parentActivityName=".Dashboard"
+            android:theme="@style/AppTheme.">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="b5.project.medibro.Dashboard" />
+        </activity>
+        <activity
+            android:name=".ViewProfile"
+            android:label="@string/title_activity_view_profile"
+            android:parentActivityName=".FeedItemDetails"
+            android:theme="@style/AppTheme.">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="b5.project.medibro.FeedItemDetails" />
+        </activity>
+
+
+        <service android:name="com.parse.PushService" />
+
+        <receiver android:name="com.parse.ParseBroadcastReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.USER_PRESENT" />
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name=".receivers.CustomPushReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.USER_PRESENT" />
+                <action android:name="com.parse.push.intent.RECEIVE" />
+                <action android:name="com.parse.push.intent.DELETE" />
+                <action android:name="com.parse.push.intent.OPEN" />
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name="com.parse.GcmBroadcastReceiver"
+            android:permission="com.google.android.c2dm.permission.SEND">
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+                <action android:name="com.google.android.c2dm.intent.REGISTRATION" />
+
+                <category android:name="b5.project.medibro" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

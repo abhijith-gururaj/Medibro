@@ -9,4 +9,14 @@
         android:layout_height="wrap_content"
         android:id="@+id/medications_list" />
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/noItems"
+        android:visibility="gone"
+        android:textSize="18sp"
+        android:textColor="@color/myPrimaryColor"
+        android:layout_gravity="center"
+        android:text="@string/no_medi_items" />
+
 </FrameLayout>

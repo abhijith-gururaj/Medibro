@@ -36,11 +36,13 @@ public class FeedComment extends ParseObject {
     }
 
     public String getParent() {
-        return getString("parent");
+        FeedItem item = (FeedItem) get("parent");
+
+        return item == null ? null : item.getObjectId();
     }
 
     public void setParent(String parent) {
         this.parent = parent;
-        put("parent", this.parent);
+        put("parent", ParseObject.createWithoutData("FeedItem", parent));
     }
 }

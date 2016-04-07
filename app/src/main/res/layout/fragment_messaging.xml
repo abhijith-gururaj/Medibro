@@ -1,16 +1,34 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
+    android:layout_marginTop="10dp"
     android:layout_height="match_parent"
     tools:context="b5.project.medibro.fragments.MessagingFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <ListView
+        android:id="@+id/chat_user_list"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="center"
-        android:gravity="center"
-        android:textColor="#000"
-        android:text="Messaging" />
+        android:layout_height="wrap_content"
+        android:divider="@color/myPrimaryColor"
+        android:dividerHeight="1dp"
+        tools:listitem="@layout/chat_users_item"></ListView>
 
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        style="?android:attr/progressBarStyleSmall"
+        android:layout_gravity="center"
+        android:visibility="invisible"
+        android:progressDrawable="@drawable/circular_progress_bar" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/no_chat_users"
+        android:id="@+id/noItems"
+        android:textSize="18sp"
+        android:textColor="@color/myPrimaryColor"
+        android:layout_gravity="center"
+        android:visibility="gone" />
 </FrameLayout>

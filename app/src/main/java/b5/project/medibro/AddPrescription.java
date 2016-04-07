@@ -206,6 +206,7 @@ public class AddPrescription extends AppCompatActivity implements NumberPicker.O
             int alarms = mListView.getAdapter().getCount();
             Log.d(TAG, "No. of Alarms: " + alarms);
             addMedication();
+            finish();
             return true;
         }
 
@@ -249,13 +250,15 @@ public class AddPrescription extends AppCompatActivity implements NumberPicker.O
             cal.set(Calendar.MILLISECOND, 0);
             //Date date= dateFormat.parse(startDate + " " + timer);
             Log.d(TAG, comps[0] + " " + comps[1] + "Alarm Time: " + cal.getTime().toString());
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), cancelId, myIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-            am.setInexactRepeating(AlarmManager.RTC_WAKEUP,
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(),
                     setId,
+                    myIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT);
+            am.setInexactRepeating(AlarmManager.RTC_WAKEUP,
+                    cal.getTimeInMillis(),
                     AlarmManager.INTERVAL_DAY,
                     pendingIntent);
             Log.d(TAG, "Alarm pid: " + setId);
-            setId++;
             if (!duration.equals("CONTINUOUS")) {
                 int cancellationDate = medSelectedDay + Integer.valueOf(duration);
                 String cancelDate = cancellationDate + "/" + medSelectedMonth + "/" + medSelectedYear;
@@ -275,8 +278,10 @@ public class AddPrescription extends AppCompatActivity implements NumberPicker.O
                         cancellationPendingIntent);
                 Log.d(TAG, "Cancelling alarm at: " + cancelDate + " pid: " + cancelId);
             }
-            cancelId++;
             db.addAlarm(id, setId, cancelId);
+            setId++;
+            cancelId++;
         }
+
     }
 }

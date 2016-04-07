@@ -8,6 +8,7 @@ import android.content.pm.Signature;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -28,18 +29,27 @@ import com.facebook.GraphResponse;
 import com.facebook.HttpMethod;
 import com.parse.LogInCallback;
 import com.parse.ParseException;
+import com.parse.ParseFacebookUtils;
 import com.parse.ParseFile;
+import com.parse.ParseInstallation;
 import com.parse.ParseTwitterUtils;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
+import com.parse.twitter.Twitter;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.security.MessageDigest;
@@ -47,7 +57,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
-import b5.project.medibro.utils.ParseFacebookUtils;
+import b5.project.medibro.utils.UtilManager;
 
 public class Welcome extends AppCompatActivity {
 
@@ -64,6 +74,7 @@ public class Welcome extends AppCompatActivity {
         add("email");
     }};
     private final String TAG = "Welcome";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -95,6 +106,18 @@ public class Welcome extends AppCompatActivity {
                 String mUserName = editTextUserName.getText().toString();
                 String mPassword = editTextPwd.getText().toString();
 
+                if (mUserName.isEmpty() || mPassword.isEmpty()) {
+                    Toast.makeText(Welcome.this, "Fields are empty. Please enter the credentials.",
+                            Toast.LENGTH_LONG).show();
+                    return;
+                }
+
+                UtilManager manager = new UtilManager(Welcome.this);
+                if (!manager.isConnectingToInternet()) {
+                    Toast.makeText(Welcome.this, "Cannot connect to Server. Please check your connection",
+                            Toast.LENGTH_LONG).show();
+                    return;
+                }
                 final ProgressDialog pDialog = new ProgressDialog(Welcome.this);
                 pDialog.setTitle("Contacting Servers");
                 pDialog.setMessage("Logging in ...");
@@ -109,6 +132,7 @@ public class Welcome extends AppCompatActivity {
                             pDialog.dismiss();
                             Toast.makeText(Welcome.this, "Successfully Logged In", Toast.LENGTH_LONG).show();
                             startActivity(new Intent(Welcome.this, Dashboard.class));
+                            finish();
                         } else {
                             Toast.makeText(Welcome.this, "cannot login", Toast.LENGTH_LONG).show();
                             Log.d(TAG, e.getMessage());
@@ -145,9 +169,14 @@ public class Welcome extends AppCompatActivity {
                                 } else if (user.isNew()) {
                                     Log.d(TAG, "User signed up and logged in through Facebook!");
                                     getUserDetailsFromFB();
+                                    ParseInstallation.getCurrentInstallation().put("user", ParseUser.getCurrentUser());
+                                    ParseInstallation.getCurrentInstallation().saveEventually();
                                 } else {
                                     Log.d(TAG, "User logged in through Facebook!");
+                                    ParseInstallation.getCurrentInstallation().put("user", ParseUser.getCurrentUser());
+                                    ParseInstallation.getCurrentInstallation().saveEventually();
                                     startActivity(new Intent(Welcome.this, Dashboard.class));
+                                    finish();
                                 }
                             }
                         });
@@ -165,8 +194,15 @@ public class Welcome extends AppCompatActivity {
                             Log.d("MyApp", "Uh oh. The user cancelled the Twitter login.");
                         } else if (user.isNew()) {
                             Log.d("MyApp", "User signed up and logged in through Twitter!");
+                            new TwitterInfoAsync().execute();
+                            ParseInstallation.getCurrentInstallation().put("user", ParseUser.getCurrentUser());
+                            ParseInstallation.getCurrentInstallation().saveEventually();
                         } else {
                             Log.d("MyApp", "User logged in through Twitter!");
+                            ParseInstallation.getCurrentInstallation().put("user", ParseUser.getCurrentUser());
+                            ParseInstallation.getCurrentInstallation().saveEventually();
+                            startActivity(new Intent(Welcome.this, Dashboard.class));
+                            finish();
                         }
                     }
                 });
@@ -201,6 +237,7 @@ public class Welcome extends AppCompatActivity {
         parseUser.setUsername(name);
         parseUser.setEmail(email);
 
+        Log.d(TAG, "name: " + parseUser.getUsername() + " email: " + parseUser.getEmail() + " objectId: " + parseUser.getObjectId());
         //        Saving profile photo as a ParseFile
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         Bitmap bitmap = ((BitmapDrawable) mProfileImage.getDrawable()).getBitmap();
@@ -213,17 +250,28 @@ public class Welcome extends AppCompatActivity {
             parseFile.saveInBackground(new SaveCallback() {
                 @Override
                 public void done(ParseException e) {
-                    parseUser.put("profileThumb", parseFile);
-                    //Finally save all the user details
-                    parseUser.saveInBackground(new SaveCallback() {
-                        @Override
-                        public void done(ParseException e) {
-                            Toast.makeText(Welcome.this, "New user:" + name + " Signed up", Toast.LENGTH_SHORT).show();
-                            startActivity(new Intent(Welcome.this, Dashboard.class));
-                        }
-                    });
-
-
+                    if (e == null) {
+                        Log.d(TAG, "Saved image");
+                        parseUser.put("profileThumb", parseFile);
+                        //Finally save all the user details
+                        parseUser.saveInBackground(new SaveCallback() {
+                            @Override
+                            public void done(ParseException e) {
+                                if (e == null) {
+                                    Log.d(TAG, "Saved User");
+                                    Toast.makeText(Welcome.this, "New user:" + name + " Signed up", Toast.LENGTH_SHORT).show();
+                                    startActivity(new Intent(Welcome.this, Dashboard.class));
+                                    finish();
+                                } else {
+                                    Log.d(TAG, "saveNewuser: " + e.getMessage());
+                                    e.printStackTrace();
+                                }
+                            }
+                        });
+                    } else {
+                        Log.d(TAG, e.getMessage());
+                        e.printStackTrace();
+                    }
                 }
             });
         }
@@ -266,30 +314,74 @@ public class Welcome extends AppCompatActivity {
         ).executeAsync();
     }
 
-    private void getUserDetailsFromParse() {
-        parseUser = ParseUser.getCurrentUser();
 
-        //Fetch profile photo
+    private String getUserDetailsFromTwitter() {
+
+        Uri.Builder b = Uri.parse("https://api.twitter.com/1.1/account/verify_credentials.json").buildUpon();
+        b.appendQueryParameter("skip_status", "true");
+        b.appendQueryParameter("include_email", "true");
+        b.appendQueryParameter("include_entities", "false");
+        String profileUrl = b.build().toString();
+        Log.d(TAG, "twitter URL: " + profileUrl);
+        Twitter twitter = ParseTwitterUtils.getTwitter();
+        HttpGet httpGet = new HttpGet(profileUrl);
+
+        twitter.signRequest(httpGet);
+
+        HttpClient client = new DefaultHttpClient();
+
+
         try {
-            ParseFile parseFile = parseUser.getParseFile("profileThumb");
-            byte[] data = parseFile.getData();
-            Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
-            mProfileImage.setImageBitmap(bitmap);
-        } catch (Exception e) {
+            HttpResponse response = client.execute(httpGet);
+            BufferedReader input = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+
+            String result = input.readLine();
+            Log.d(TAG, "getTwitterInfo: result=" + result);
+
+            JSONObject JsonResponse = new JSONObject(result);
+
+            String profileImageUrl = JsonResponse.getString("profile_image_url");
+            name = JsonResponse.getString("name");
+            email = JsonResponse.getString("email");
+
+            return profileImageUrl;
+        } catch (IOException | JSONException e) {
             e.printStackTrace();
+            return null;
+        } finally {
+
         }
-
-        //mEmailID.setText(parseUser.getEmail());
-        // mUsername.setText(parseUser.getUsername());
-
-        Toast.makeText(Welcome.this, "Welcome back " + parseUser.getUsername(), Toast.LENGTH_SHORT).show();
-
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         ParseFacebookUtils.onActivityResult(requestCode, resultCode, data);
+    }
+
+    class TwitterInfoAsync extends AsyncTask<Void, Void, Void> {
+        String url;
+        Bitmap bitmap;
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            url = getUserDetailsFromTwitter();
+            if (url != null)
+                bitmap = DownloadImageBitmap(url);
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            mProfileImage.setImageBitmap(bitmap);
+            saveNewUser();
+        }
     }
 
     class ProfilePhotoAsync extends AsyncTask<String, String, String> {
